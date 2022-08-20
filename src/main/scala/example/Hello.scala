@@ -13,3 +13,13 @@ class _FCT[+T](val _fct: T) {
   def foldLeft[U](zero: U)(f: (U, T) => U)(implicit c: T=> U): U = f(c(_fct), _fct)
   def foreach(p: T => Unit): Unit = p(_fct)
 }
+
+
+/** Perform an transformation operation
+ *
+ *  @constructor automatically invoke a given operation.
+ *  @param op  PipeOperator instance
+ */
+class Transform[-T, +U](val op: PipeOperator[T, U]) extends _FCT[Function[T, Option[U]]](op.|>) {
+  def |>(data: T): Option[U] = _fct(data)
+}
