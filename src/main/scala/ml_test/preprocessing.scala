@@ -123,3 +123,25 @@ class ExpMovingAverage[@specialized(Double) T <% Double](val alpha: Double) exte
 // val eMvAve = ExpMovingAverage(p)
 // val results = price :: sMvAve.|>(price) :: wMvAve.|>(price) :: eMvAve.|>(price) :: List[XTSeries[Double]]() //5
 // Val outFile = "output/chap3/mvaverage" + p.toString + ".csv" DataSink[Double]( outFile) |> results //6
+
+
+trait DTransform[T] extends PipeOperator[XTSeries[T], XTSeries[Double]] {
+  def padSize(xtSz: Int, even: Boolean=true): Int = {
+    val sz = if ( even ) xtSz else xtSz-1
+    if ( (sz & (sz-1)) == 0 ) 0
+    else {
+      var bitPos = 0
+      do {
+        bitPos += 1
+      } while ( (sz >> bitPos) > 0)
+      (if(even) (1 <<bitPos) else (1<<bitPost) +1) - xtSz
+    }
+  }
+
+  def pad(xt: XTSeries[T], even: Boolean=true)
+         (implicit f: T => Double): DblVector = {
+    val newSize = padSize(xt.size, even)
+    val arr: DblVector = xt
+    if (newSize > 0) arr ++ Array.fill(newSize)(0.0) else arr
+  }
+}
