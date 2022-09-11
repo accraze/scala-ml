@@ -145,3 +145,18 @@ trait DTransform[T] extends PipeOperator[XTSeries[T], XTSeries[Double]] {
     if (newSize > 0) arr ++ Array.fill(newSize)(0.0) else arr
   }
 }
+
+
+class DFT[@specialized(Double) T<%Double] extends DTransform[T] {
+  def |> : PartialFunction[XTSeries[T], XTSeries[Double]] = {
+    case xt: XTSeries[T] if(xt != null && xt.length > 0) =>
+      XTSeries[Double] (fwrd(xt)._2)
+  }
+  def fwrd(xt:XTSeries[T]): (RealTransformer, DbleVector) = {
+    val rdt = if (Math.abs(xt.head) < DFT_EPS)
+      new FastSineTransformer(DstNormalization.STANDARD_DST_I)
+    else new FastCosineTransformer(DctNormalization.STANDARD_DCT_I)
+
+    (rdt, rdt.transform (pad(xt, xt.head==0.0), TransformType.FORWARD))
+  }
+}
